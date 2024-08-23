@@ -6,48 +6,46 @@ class TestTask
     public static void main(String[] args)
     {
         String[] sources = {"in1.txt", "in2.txt"};
+
+        String strOut;
+
         try
         {
-            OutputStreamWriter integersOut = new OutputStreamWriter(new FileOutputStream("integers.txt"), StandardCharsets.UTF_8);
-            OutputStreamWriter floatsOut = new OutputStreamWriter(new FileOutputStream("floats.txt"), StandardCharsets.UTF_8);
-            OutputStreamWriter stringsOut = new OutputStreamWriter(new FileOutputStream("strings.txt"), StandardCharsets.UTF_8);
+            BufferedWriter integersOut = new BufferedWriter(new FileWriter("integers.txt"));
+            BufferedWriter floatsOut = new BufferedWriter(new FileWriter("floats.txt"));
+            BufferedWriter stringsOut = new BufferedWriter(new FileWriter("strings.txt"));
 
             for (String source : sources)
             {
-                try (InputStreamReader fileIn = new InputStreamReader(new FileInputStream(source), StandardCharsets.UTF_8))
+                
+                try (BufferedReader fileIn = new BufferedReader(new FileReader(source)))
                 {
-                    StringBuilder currentStr = new StringBuilder();
-                    String strOut;
-                    char[] charBuf = new char[1];
-                    while (fileIn.read(charBuf) != -1)
+                    while ((strOut=fileIn.readLine())!=null)
                     {
-                        if (charBuf[0] != '\n')
-                        {
-                            currentStr.append(charBuf[0]);
-                            continue;
-                        }
-
-                        strOut = currentStr.toString();
-                        currentStr.delete(0, currentStr.length());
-
                         if (strOut.matches("[-+]?\\d+"))
                         {
-                            integersOut.write(strOut + '\n');
-                            continue;
+                            integersOut.write(strOut);
+                            integersOut.newLine();
                         }
-                        if (strOut.matches("[-+]?\\d+[.,]\\d+([Ee]\\^?\\[-+]?\\d+)?"))
+                        else if (strOut.matches("[-+]?\\d+[.,]\\d+([EeЕе]^?[-+]?\\d+)?"))
                         {
-                            floatsOut.write(strOut + '\n');
-                            continue;
+                            floatsOut.write(strOut);
+                            floatsOut.newLine();
                         }
-                        stringsOut.write(strOut + '\n');
+                        else 
+                        {
+                            stringsOut.write(strOut);
+                            stringsOut.newLine();
+                        }
                     }
                 }
                 catch (IOException ex)
                 {
+                    System.out.println("Ошибка работы с потоком чтения файла " + source);
                     System.out.println(ex.getMessage());
                 }
             }
+
             integersOut.flush();
             floatsOut.flush();
             stringsOut.flush();
@@ -58,6 +56,7 @@ class TestTask
         }
         catch (IOException ex)
         {
+            System.out.println("Ошибка работы с потоком записи");
             System.out.println(ex.getMessage());
         }
     }
