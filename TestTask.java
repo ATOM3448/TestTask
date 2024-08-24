@@ -3,21 +3,8 @@ import java.util.*;
 
 class TestTask
 {
-    // Функция считывания значения аргумента с пробелами
-    private String readArgs(String[] args, int startIndex)
-    {
-        if (!args[startIndex].startsWith("\""))
-        {
-            if (args[startIndex].startsWith("-"))
-                return "";
-            return args[startIndex];
-        }
-
-        return;
-    }
-
     public static void main(String[] args)
-    
+    {
         // Определим флаги наличия аргументов
         boolean lastArgSkiped = false;
 
@@ -55,13 +42,32 @@ class TestTask
                 case "-o":
                     if (outPath != "")
                         break;
-                    
+                    outPath = args[++i];
                     break;
                 case "-p":
-
+                    if (prefix != "")
+                        break;
+                    prefix = args[++i];
                     break;
                 default:
+                    sources.add(args[i]);
                     break;
+            }
+        }
+
+        // Создаем каталог для выходных файлов
+        if (outPath!="")
+        {
+            try
+            {
+                File outDir = new File(outPath);
+                if (!outDir.exists() && !outDir.mkdir())
+                    throw new Exception("Не удалось создать каталог");
+            }
+            catch (Exception ex)
+            {
+                outPath = "";
+                System.out.printf("Ошибка создания каталога для выходных файлов\n%s\nУстановлен путь по умолчанию\n", ex.getMessage());
             }
         }
 
@@ -86,12 +92,12 @@ class TestTask
                     // Считываем строку и через регулярки проверяем тип
                     while ((strBuf=fileIn.readLine())!=null)
                     {
-                        if (strBuf.matches("[-+]?\\d+"))
+                        if (strBuf.matches("([-+]?\\d+)|(\\([-+]?\\d+\\))"))
                         {
                             integersOut.write(strBuf);
                             integersOut.newLine();
                         }
-                        else if (strBuf.matches("[-+]?\\d+[.,]\\d+([EeЕе]\\^?[-+]?\\d+)?"))
+                        else if (strBuf.matches("[-+]?\\d+[.,]\\d+([EeЕе]\\^?(([-+]?\\d+)|(\\([-+]?\\d+\\))))?"))
                         {
                             floatsOut.write(strBuf);
                             floatsOut.newLine();
@@ -105,8 +111,7 @@ class TestTask
                 }
                 catch (IOException ex)
                 {
-                    System.out.println("Ошибка работы с потоком чтения файла " + source);
-                    System.out.println(ex.getMessage());
+                    System.out.printf("Ошибка работы с потоком чтения файла %s\n%s\nФайл игнорируется\n", source, ex.getMessage());
                 }
             }
 
@@ -122,8 +127,7 @@ class TestTask
         }
         catch (IOException ex)
         {
-            System.out.println("Ошибка работы с потоком записи");
-            System.out.println(ex.getMessage());
+            System.out.printf("Ошибка работы с потоком записи\n%s\n", ex.getMessage());
         }
     }
 }
