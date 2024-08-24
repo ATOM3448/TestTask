@@ -5,9 +5,6 @@ class TestTask
 {
     public static void main(String[] args)
     {
-        // Определим флаги наличия аргументов
-        boolean lastArgSkiped = false;
-
         // Определим поля хранения аргументов
         boolean fullStat = false;
         boolean append = false;
@@ -18,35 +15,20 @@ class TestTask
         // Считываем аргументы без доп. пакетов
         for (int i = 0; i < args.length; i++)
         {
-            /*
-            Любой многократный ввод одинаковых аргументов никак не влияет на ход выполенния,
-            кроме времени на микроуровне.
-            */
             switch (args[i])
             {
                 case "-f":
                     fullStat = true;
                     break;
                 case "-s":
-                    /*
-                    Если установлено, что нужна полная статистика,
-                    значит уже был использован противоположный аргумент,
-                    значит выполнение данного блока кода ошибка и игнорируется.
-                    В целом данный блок кода ничего и не делает
-                    но данный аргумент нужен по ТЗ
-                    */
                     break;
                 case "-a":
                     append = true;
                     break;
                 case "-o":
-                    if (outPath != "")
-                        break;
                     outPath = args[++i];
                     break;
                 case "-p":
-                    if (prefix != "")
-                        break;
                     prefix = args[++i];
                     break;
                 default:
