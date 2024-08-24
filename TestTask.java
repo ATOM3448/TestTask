@@ -37,22 +37,6 @@ class TestTask
             }
         }
 
-        // Создаем каталог для выходных файлов
-        if (outPath!="")
-        {
-            try
-            {
-                File outDir = new File(outPath);
-                if (!outDir.exists() && !outDir.mkdir())
-                    throw new Exception("Не удалось создать каталог");
-            }
-            catch (Exception ex)
-            {
-                outPath = "";
-                System.out.printf("Ошибка создания каталога для выходных файлов\n%s\nУстановлен путь по умолчанию\n", ex.getMessage());
-            }
-        }
-
         // Объединим путь и префикс
         outPath += prefix;
 
