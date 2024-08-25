@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.math.*;
 
-class TestTask
+class TestTask 
 {
     public static void main(String[] args)
     {
@@ -38,6 +38,20 @@ class TestTask
             }
         }
 
+        if (outPath != null)
+        {
+            try
+            {
+                new File(outPath).mkdirs();
+            }
+            catch (SecurityException ex)
+            {
+                System.err.printf("Ошибка прав доступа при создании каталога вывода\n%s\nУстановлен путь по умолчанию\n", ex.getMessage());
+                outPath = "";
+            }
+        }
+        
+
         // Объединим путь и префикс
         outPath += prefix;
 
@@ -46,47 +60,49 @@ class TestTask
         BigInteger counterFloat = BigInteger.ZERO;
         BigInteger counterStr = BigInteger.ZERO;
 
-
         // Переменные полной статистики
-        BigInteger minInt = BigInteger.ZERO;
-        BigInteger maxInt = BigInteger.ZERO;
-        BigInteger sumInt = BigInteger.ZERO;
-        BigDecimal minFloat = BigDecimal.ZERO;
-        BigDecimal maxFloat = BigDecimal.ZERO;
-        BigDecimal sumFloat = BigDecimal.ZERO;
+        BigInteger minInt = null;
+        BigInteger maxInt = null;
+        BigInteger sumInt = null;
+        BigDecimal minFloat = null;
+        BigDecimal maxFloat = null;
+        BigDecimal sumFloat = null;
         int minStr = 0;
         int maxStr = 0;
 
+        // Потоки вывода результатов
+        BufferedWriter integersOut = null;
+        BufferedWriter floatsOut = null;
+        BufferedWriter stringsOut = null;
+
+        // Буффер для считываемых строк
+        String strBuf;
+
+        // Последовательный проход по источникам
         try
         {
-            // Потоки вывода результатов
-            BufferedWriter integersOut = new BufferedWriter(new FileWriter(outPath+"integers.txt", append));
-            BufferedWriter floatsOut = new BufferedWriter(new FileWriter(outPath+"floats.txt", append));
-            BufferedWriter stringsOut = new BufferedWriter(new FileWriter(outPath+"strings.txt", append));
-
-            // Буффер для считываемых строк
-            String strBuf;
-
-            // Последовательный проход по источникам
             for (String source : sources)
             {
                 try (BufferedReader fileIn = new BufferedReader(new FileReader(source)))
                 {
                     // Считываем строку и через регулярки проверяем тип
-                    while ((strBuf=fileIn.readLine()) != null)
+                    while ((strBuf = fileIn.readLine()) != null)
                     {
                         if (strBuf.matches("([-+]?\\d+)|(\\([-+]?\\d+\\))"))
                         {
+                            counterInt = counterInt.add(BigInteger.ONE);
+
+                            if (counterInt.equals(BigInteger.ONE))
+                                integersOut = new BufferedWriter(new FileWriter(outPath + "integers.txt", append));
+
                             integersOut.write(strBuf);
                             integersOut.newLine();
-
-                            counterInt = counterInt.add(BigInteger.ONE);
 
                             if (!fullStat)
                                 continue;
 
                             BigInteger bufInt = new BigInteger(strBuf.replace("(", "")
-                                                                     .replace(")", ""));
+                                                                    .replace(")", ""));
 
                             if (counterInt.equals(BigInteger.ONE))
                             {
@@ -109,18 +125,21 @@ class TestTask
                         }
                         else if (strBuf.matches("[-+]?\\d+[.,]\\d+([EeЕе]\\^?(([-+]?\\d+)|(\\([-+]?\\d+\\))))?"))
                         {
+                            counterFloat = counterFloat.add(BigInteger.ONE);
+
+                            if (counterFloat.equals(BigInteger.ONE))
+                                floatsOut = new BufferedWriter(new FileWriter(outPath + "floats.txt", append));
+
                             floatsOut.write(strBuf);
                             floatsOut.newLine();
-
-                            counterFloat = counterFloat.add(BigInteger.ONE);
 
                             if (!fullStat)
                                 continue;
 
                             BigDecimal bufFloat = new BigDecimal(strBuf.replace("^", "")
-                                                                       .replace("(", "")
-                                                                       .replace(")", "")
-                                                                       .replace(",", "."));
+                                                                    .replace("(", "")
+                                                                    .replace(")", "")
+                                                                    .replace(",", "."));
 
                             if (counterFloat.equals(BigInteger.ONE))
                             {
@@ -141,12 +160,14 @@ class TestTask
                                 minFloat = bufFloat;
                             }
                         }
-                        else 
+                        else
                         {
+                            counterStr = counterStr.add(BigInteger.ONE);
+                            if (counterStr.equals(BigInteger.ONE))
+                                stringsOut = new BufferedWriter(new FileWriter(outPath + "strings.txt", append));
+
                             stringsOut.write(strBuf);
                             stringsOut.newLine();
-
-                            counterStr = counterStr.add(BigInteger.ONE);
 
                             if (!fullStat)
                                 continue;
@@ -171,29 +192,41 @@ class TestTask
                         }
                     }
                 }
-                catch (IOException ex)
+                catch (IOException ex) 
                 {
-                    System.out.printf("Ошибка работы с потоком чтения файла %s\n%s\nФайл игнорируется\n", source, ex.getMessage());
+                    System.out.printf("Ошибка работы с потоком чтения файла %s\n%s\nФайл игнорируется\n", source,
+                                                                                                                ex.getMessage());
                 }
             }
 
-            // Сохраняем результат
+        // Сохраняем результат и закрываем потоки
+        if (counterInt.compareTo(BigInteger.ZERO) == 1)
+        {
             integersOut.flush();
-            floatsOut.flush();
-            stringsOut.flush();
-
-            // Закрываем потоки вывода
             integersOut.close();
+        }
+
+        if (counterFloat.compareTo(BigInteger.ZERO) == 1)
+        {
+            floatsOut.flush();
             floatsOut.close();
+        }
+
+        if (counterStr.compareTo(BigInteger.ZERO) == 1)
+        {
+            stringsOut.flush();
             stringsOut.close();
         }
-        catch (IOException ex)
-        {
-            System.out.printf("Ошибка работы с потоком записи\n%s\n", ex.getMessage());
-        }
+    }
+    catch(IOException ex) 
+    {
+        System.out.printf("Ошибка работы с потоками записи результатов\n%s\nЗавершение программы\n", ex.getMessage());
+        return;
+    }
+
 
         System.out.printf("Integer stats:\n\tCount: %s\n", counterInt);
-        if (fullStat && (counterInt.compareTo(BigInteger.ZERO) == 1))
+        if (fullStat && (counterInt.compareTo(BigInteger.ZERO) == 1))              
             System.out.printf("\tMax: %s\n\tMin: %s\n\tSum: %s\n\tAverange: %s\n", maxInt,
                                                                                           minInt,
                                                                                           sumInt,
