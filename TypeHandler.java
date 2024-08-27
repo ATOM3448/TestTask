@@ -75,9 +75,17 @@ class TypeHandler {
         File root = outFile.getParentFile();
 
         if ((root != null) && !root.exists())
+        {
             root.mkdirs();
+            if (!root.exists())
+                throw new SecurityException("Не удалось создать каталог для вывода");
+        }
         if (!outFile.exists())
+        {
             outFile.createNewFile();
+            if (!outFile.exists())
+                throw new SecurityException("Не удалось создать файл для вывода");
+        }
 
         out = new BufferedWriter(new FileWriter(outFile, append));
     }
