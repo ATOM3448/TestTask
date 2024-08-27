@@ -1,6 +1,3 @@
-// ПЕРЕВЕДИ В ООП ПАРСИНГ АРГУМЕНТОВ
-// РЕАЛИЗУЙ ПЕРЕХВАТ ИСКЛЮЧЕНИЙ
-
 import java.io.*;
 import java.util.*;
 
@@ -14,28 +11,95 @@ class TestTask
         String prefix = "";
         ArrayList<String> sources = new ArrayList<String>();
 
-        for (int i = 0; i < args.length; i++)
+        try
         {
-            switch (args[i])
+            boolean[] argsBlocker = {false, false, false, false, false};
+
+            for (int i = 0; i < args.length; i++)
             {
-                case "-f":
-                    fullStat = true;
-                    break;
-                case "-s":
-                    break;
-                case "-a":
-                    append = true;
-                    break;
-                case "-o":
-                    outPath = args[++i].replace('\\', '/');
-                    break;
-                case "-p":
-                    prefix = args[++i];
-                    break;
-                default:
-                    sources.add(args[i]);
-                    break;
+                switch (args[i])
+                {
+                    case "-f":
+                        if (argsBlocker[0])
+                            throw new Exception("Аргумент \"-f\" указан некорректно");
+
+                        fullStat = true;
+
+                        argsBlocker[0] = true;
+                        break;
+                    case "-a":
+                        if (argsBlocker[1])
+                            throw new Exception("Аргумент \"-a\" указан некорректно");
+
+                        append = true;
+
+                        argsBlocker[0] = true;
+                        argsBlocker[1] = true;
+                        break;
+                    case "-p":
+                        if (argsBlocker[2])
+                            throw new Exception("Аргумент \"-p\" указан некорректно");
+
+                        try
+                        {
+                            prefix = args[++i];
+                        }
+                        catch (ArrayIndexOutOfBoundsException ex)
+                        {
+                            throw new Exception("Не удается найти значение аргумента \"-p\"");
+                        }
+
+                        if (prefix.replace('\\', '/').contains("/"))
+                            throw new Exception("Значение аргумента \"-p\" указано некорректно\n" +
+                                                "Если вы хотели указать путь к каталогу результатов - используйте \"-o <path>\"");
+
+                        argsBlocker[0] = true;
+                        argsBlocker[1] = true;
+                        argsBlocker[2] = true;
+                        break;
+                    case "-o":
+                        if (argsBlocker[3])
+                            throw new Exception("Аргумент \"-o\" указан некорректно");
+
+                        try
+                        {
+                            outPath = args[++i].replace('\\', '/');
+                        }
+                        catch (ArrayIndexOutOfBoundsException ex)
+                        {
+                            throw new Exception("Не удается найти значение аргумента \"-o\"");
+                        }
+
+                        if (!outPath.endsWith("/"))
+                            outPath += "/";
+
+                        argsBlocker[0] = true;
+                        argsBlocker[1] = true;
+                        argsBlocker[2] = true;
+                        argsBlocker[3] = true;
+                        break;
+                    default:
+                        if (!args[i].endsWith(".txt"))
+                            throw new Exception("Незивестный аргумент\nЕсли вы указывали файл для чтения - проверьте тип файла");
+
+                        sources.add(args[i].replace('\\', '/'));
+
+                        argsBlocker[0] = true;
+                        argsBlocker[1] = true;
+                        argsBlocker[2] = true;
+                        argsBlocker[3] = true;
+                        break;
+                }
             }
+
+            if (sources.size() == 0)
+                throw new Exception("Не было передано ни одного файла для чтения");
+        }
+        catch (Exception ex)
+        {
+            System.out.println("Ошибка при чтении аргументов\nПрограмма завершена во избежание нежелательного результата");
+            System.err.println(ex.getMessage());
+            return;
         }
 
         outPath += prefix;
@@ -61,7 +125,7 @@ class TestTask
         }
         catch (Exception ex)
         {
-            System.out.println(ex.getMessage());
+            System.err.println(ex.getMessage());
         }
 
         String strBuf;
