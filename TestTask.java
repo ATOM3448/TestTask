@@ -96,8 +96,7 @@ class TestTask {
 
                     sources.add(args[i].replace('\\', '/'));
 
-                    // Блокируем этот аргумент во избежание повтора
-                    // А также аргументы, что должны быть перед ним
+                    // Блокируем все аргументы
                     argsBlocker[0] = true;
                     argsBlocker[1] = true;
                     argsBlocker[2] = true;
