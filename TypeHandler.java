@@ -119,16 +119,15 @@ class TypeHandler {
 
     /**
      * <p>
-     * Based on the regular expression specified in the constructor via the
-     * {@code compare(value)} method a decision is made to assign {@code value} to
-     * the specified type or not.
+     * Основываясь на регулярном выражении, переданном в конструктор метож
+     * {@code compare(value)} решает относить-ли переданное значение {@code value} к
+     * определенном типу или нет.
      * 
      * <p>
-     * Based on the check, {@code value} is saved to the file specified in the
-     * constructor, and the method also returns <boolean> so that the user can
-     * determine the solution of the method.
+     * Основываясь на рещении, {@code value} сохраняется в файл, указанный в
+     * конструкторе
      *
-     * @return {@code true} if value was saved; {@code false} else.
+     * @return {@code true} если файл сохранен; {@code false} иначе.
      *
      * @throws WriterException       Ошибка при записи значения
      * @throws FileCreationException Ошибка при создании выходных каталогов/файлов
