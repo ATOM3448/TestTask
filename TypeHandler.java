@@ -5,11 +5,9 @@ import MyExceptions.*;
 /**
  * <p>
  * Класс - обработчик типа.
- * 
  * <p>
- * Решает относить указанное значение к его типу или нет,
- * записывает прошедшие значения,
- * ведет статистику,
+ * Решает относить указанное значение к его типу или нет, записывает прошедшие
+ * значения, ведет статистику,
  **/
 
 class TypeHandler {
@@ -41,8 +39,8 @@ class TypeHandler {
 
     /**
      * @param name     Название типа
-     * @param pattern  Регулярное выражение, основываясь на октором
-     *                 решается относить ли значение к этому типу
+     * @param pattern  Регулярное выражение, основываясь на октором решается
+     *                 относить ли значение к этому типу
      * @param fullStat Решение о ведении полной статистики
      * @param append   Решение о расрении существующих файлов
      * @param outPath  Путь к файлу, где будут записываться результаты отбора
@@ -52,7 +50,7 @@ class TypeHandler {
      * @throws ModsException Если переданный модификатор имеет размерность != 2
      */
     public TypeHandler(final String name, final String pattern, final boolean fullStat, final boolean append,
-            final String outPath, final String[]... mods) throws ModsException {
+                       final String outPath, final String[]... mods) throws ModsException {
         this.name = name;
         this.pattern = pattern;
         this.outFile = new File(outPath);
@@ -97,8 +95,7 @@ class TypeHandler {
 
     /**
      * Преобразует {@code String value} в {@code BigDecimal} с помощью указанных
-     * {@code mods}
-     * для возможности вести полную статистику
+     * {@code mods} для возможности вести полную статистику
      * 
      * @param value Значение которое должно быть преобразовано
      * @return {@code BigDecimal}
@@ -122,13 +119,11 @@ class TypeHandler {
      * Основываясь на регулярном выражении, переданном в конструктор метож
      * {@code compare(value)} решает относить-ли переданное значение {@code value} к
      * определенном типу или нет.
-     * 
      * <p>
      * Основываясь на рещении, {@code value} сохраняется в файл, указанный в
      * конструкторе
      *
      * @return {@code true} если файл сохранен; {@code false} иначе.
-     *
      * @throws WriterException       Ошибка при записи значения
      * @throws FileCreationException Ошибка при создании выходных каталогов/файлов
      */
@@ -139,11 +134,13 @@ class TypeHandler {
         if (counter.equals(BigInteger.ZERO)) {
             try {
                 initWriter();
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 throw new FileCreationException(
                         "Ошибка ввода/вывода при попытке создать файл/каталог результата\n" + ex.getMessage(),
                         ex.getCause());
-            } catch (SecurityException ex) {
+            }
+            catch (SecurityException ex) {
                 throw new FileCreationException("Нет прав чтобы создать файл/каталог результата\n" + ex.getMessage(),
                         ex.getCause());
             }
@@ -152,7 +149,8 @@ class TypeHandler {
         try {
             out.write(value);
             out.newLine();
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             throw new WriterException("Ошибка ввода/вывода при попытке сохранить результат\n" + ex.getMessage(),
                     ex.getCause());
         }
@@ -206,6 +204,6 @@ class TypeHandler {
 
         if ((mods[0][0] != "String") && mods[0][1] != "String")
             System.out.printf("\tSum: %s\n\tAverange: %s\n", sum,
-                    sum.divide(new BigDecimal(counter), 3, RoundingMode.HALF_DOWN));
+                                                                    sum.divide(new BigDecimal(counter), 3, RoundingMode.HALF_DOWN));
     }
 }
