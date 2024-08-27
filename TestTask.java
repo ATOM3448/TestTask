@@ -1,27 +1,23 @@
 import java.io.*;
 import java.util.*;
+import MyExceptions.*;
 
-class TestTask 
-{
-    public static void main(String[] args)
-    {
+class TestTask {
+    public static void main(String[] args) {
         boolean fullStat = false;
         boolean append = false;
         String outPath = "";
         String prefix = "";
         ArrayList<String> sources = new ArrayList<String>();
 
-        try
-        {
-            boolean[] argsBlocker = {false, false, false, false, false};
+        try {
+            boolean[] argsBlocker = { false, false, false, false, false };
 
-            for (int i = 0; i < args.length; i++)
-            {
-                switch (args[i])
-                {
+            for (int i = 0; i < args.length; i++) {
+                switch (args[i]) {
                     case "-f":
                         if (argsBlocker[0])
-                            throw new Exception("Аргумент \"-f\" указан некорректно");
+                            throw new ArgumentsHandlerException("Аргумент \"-f\" указан некорректно");
 
                         fullStat = true;
 
@@ -29,7 +25,7 @@ class TestTask
                         break;
                     case "-a":
                         if (argsBlocker[1])
-                            throw new Exception("Аргумент \"-a\" указан некорректно");
+                            throw new ArgumentsHandlerException("Аргумент \"-a\" указан некорректно");
 
                         append = true;
 
@@ -38,20 +34,17 @@ class TestTask
                         break;
                     case "-p":
                         if (argsBlocker[2])
-                            throw new Exception("Аргумент \"-p\" указан некорректно");
+                            throw new ArgumentsHandlerException("Аргумент \"-p\" указан некорректно");
 
-                        try
-                        {
+                        try {
                             prefix = args[++i];
-                        }
-                        catch (ArrayIndexOutOfBoundsException ex)
-                        {
-                            throw new Exception("Не удается найти значение аргумента \"-p\"");
+                        } catch (ArrayIndexOutOfBoundsException ex) {
+                            throw new ArgumentsHandlerException("Не удается найти значение аргумента \"-p\"");
                         }
 
                         if (prefix.replace('\\', '/').contains("/"))
-                            throw new Exception("Значение аргумента \"-p\" указано некорректно\n" +
-                                                "Если вы хотели указать путь к каталогу результатов - используйте \"-o <path>\"");
+                            throw new ArgumentsHandlerException("Значение аргумента \"-p\" указано некорректно\n" +
+                                    "Если вы хотели указать путь к каталогу результатов - используйте \"-o <path>\"");
 
                         argsBlocker[0] = true;
                         argsBlocker[1] = true;
@@ -59,15 +52,12 @@ class TestTask
                         break;
                     case "-o":
                         if (argsBlocker[3])
-                            throw new Exception("Аргумент \"-o\" указан некорректно");
+                            throw new ArgumentsHandlerException("Аргумент \"-o\" указан некорректно");
 
-                        try
-                        {
+                        try {
                             outPath = args[++i].replace('\\', '/');
-                        }
-                        catch (ArrayIndexOutOfBoundsException ex)
-                        {
-                            throw new Exception("Не удается найти значение аргумента \"-o\"");
+                        } catch (ArrayIndexOutOfBoundsException ex) {
+                            throw new ArgumentsHandlerException("Не удается найти значение аргумента \"-o\"");
                         }
 
                         if (!outPath.endsWith("/"))
@@ -80,7 +70,9 @@ class TestTask
                         break;
                     default:
                         if (!args[i].endsWith(".txt"))
-                            throw new Exception("Незивестный аргумент\nЕсли вы указывали файл для чтения - проверьте тип файла");
+                            throw new ArgumentsHandlerException("Незивестный аргумент\n" +
+                                    "Если вы указывали файл для чтения - проверьте тип файла\n" +
+                                    "Если вы указывали значение аргумента, которое имеет символ пробела - оберните значение целиком с помощью \"");
 
                         sources.add(args[i].replace('\\', '/'));
 
@@ -93,11 +85,10 @@ class TestTask
             }
 
             if (sources.size() == 0)
-                throw new Exception("Не было передано ни одного файла для чтения");
-        }
-        catch (Exception ex)
-        {
-            System.out.println("Ошибка при чтении аргументов\nПрограмма завершена во избежание нежелательного результата");
+                throw new ArgumentsHandlerException("Не было передано ни одного файла для чтения");
+        } catch (ArgumentsHandlerException ex) {
+            System.out.println(
+                    "Ошибка при обработке аргументов\nРабота завершена во избежание нежелательного результата");
             System.err.println(ex.getMessage());
             return;
         }
@@ -105,76 +96,63 @@ class TestTask
         outPath += prefix;
 
         ArrayList<TypeHandler> handlers = new ArrayList<TypeHandler>();
-        try
-        {
+        try {
             handlers.add(new TypeHandler("Integers",
-                                         "([-+]?\\d+)|(\\([-+]?\\d+\\))",
-                                         fullStat, append,
-                                         outPath+"integers.txt", 
-                                         new String[][] {{"(", ""}, {")", ""}}));
+                    "([-+]?\\d+)|(\\([-+]?\\d+\\))",
+                    fullStat, append,
+                    outPath + "integers.txt",
+                    new String[][] { { "(", "" }, { ")", "" } }));
             handlers.add(new TypeHandler("Floats",
-                                         "[-+]?\\d+[.,]\\d+([EeЕе]\\^?(([-+]?\\d+)|(\\([-+]?\\d+\\))))?",
-                                         fullStat, append,
-                                         outPath+"floats.txt",
-                                         new String[][] {{"(", ""}, {")", ""}, {"^", ""}, {",", "."}}));
+                    "[-+]?\\d+[.,]\\d+([EeЕе]\\^?(([-+]?\\d+)|(\\([-+]?\\d+\\))))?",
+                    fullStat, append,
+                    outPath + "floats.txt",
+                    new String[][] { { "(", "" }, { ")", "" }, { "^", "" }, { ",", "." } }));
             handlers.add(new TypeHandler("Strings",
-                                         ".*",
-                                         fullStat, append,
-                                         outPath+"strings.txt",
-                                         new String[] {"String", "String"}));
-        }
-        catch (Exception ex)
-        {
+                    ".*",
+                    fullStat, append,
+                    outPath + "strings.txt",
+                    new String[] { "String", "String" }));
+        } catch (ModsException ex) {
+            System.out.println("Ошибка инициализации обработчиков\nПеркращение работы");
             System.err.println(ex.getMessage());
+            return;
         }
 
         String strBuf;
 
-        for (String source : sources)
-        {
-            try (BufferedReader fileIn = new BufferedReader(new FileReader(source)))
-            {
-                while ((strBuf = fileIn.readLine()) != null)
-                {
-                    for (int i = 0; i < handlers.size(); i++)
-                    {
-                        try
-                        {
-                            if (handlers.get(i).compare(strBuf))
-                                break;
-                        }
-                        catch (Exception ex)
-                        {
-                            System.out.println(ex.getMessage());
-                        }
+        for (String source : sources) {
+            try (BufferedReader fileIn = new BufferedReader(new FileReader(source))) {
+                while ((strBuf = fileIn.readLine()) != null) {
+                    for (int i = 0; i < handlers.size(); i++) {
+                        if (handlers.get(i).compare(strBuf))
+                            break;
                     }
                 }
-            }
-            catch (IOException ex) 
-            {
-                if (java.util.regex.Pattern.compile(outPath+"(integers|floats|strings).txt").matcher(ex.getMessage()).find())
-                {
-                    System.out.printf("Ошибка работы с потоком записи результатов\n%s\nПрекращение работы\n", ex.getMessage());
-                    break;
-                }
-
-                System.out.printf("Ошибка работы с потоком чтения файла %s\n%s\nФайл игнорируется\n", source,
-                                                                                                             ex.getMessage());
+            } catch (WriterException ex) {
+                System.out.println("Ошибка записи результатов\nПрекращение работы");
+                System.err.println(ex.getMessage());
+                return;
+            } catch (FileCreationException ex) {
+                System.out.println("Ошибка создания каталогов/файлов для сохранения результатов\nПрекращение работы");
+                System.err.println(ex.getMessage());
+                return;
+            } catch (Exception ex) {
+                System.out.printf("Ошибка работы с потоком чтения файла %s\nФайл игнорируется\n", source);
+                System.err.println(ex.getMessage());
             }
         }
 
-        try 
-        {
-            for (int i = 0; i < handlers.size(); i++)
-            handlers.get(i).closeWriter();
-        }
-        catch (IOException ex)
-        {
-            System.out.printf("Ошибка при закрытии потока записи результатов\n%s\nПрекращение работы\n", ex.getMessage());
-            return;
+        for (int i = 0; i < handlers.size(); i++) {
+            try {
+                handlers.get(i).closeWriter();
+            } catch (IOException ex) {
+                System.out.printf("Ошибка при закрытии потока записи результатов\nПрекращение работы\n");
+                System.err.println(ex.getMessage());
+                return;
+            }
         }
 
         for (int i = 0; i < handlers.size(); i++)
-                handlers.get(i).printStats();
+            handlers.get(i).printStats();
     }
 }
