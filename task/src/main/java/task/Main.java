@@ -1,8 +1,13 @@
-import java.io.*;
-import java.util.*;
-import MyExceptions.*;
+package task;
 
-class TestTask {
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import task.MyExceptions.*;
+
+public class Main {
     public static void main(String[] args) {
         // Переменные для сохранения аргументов
         boolean fullStat = false;

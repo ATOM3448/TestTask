@@ -1,4 +1,4 @@
-package MyExceptions;
+package task.MyExceptions;
 
 public class FileCreationException extends WriterException {
     public FileCreationException(String message) { super(message); }

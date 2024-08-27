@@ -1,6 +1,8 @@
+package task;
+
 import java.io.*;
 import java.math.*;
-import MyExceptions.*;
+import task.MyExceptions.*;
 
 /**
  * <p>

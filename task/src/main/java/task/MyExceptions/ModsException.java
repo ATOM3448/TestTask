@@ -1,4 +1,4 @@
-package MyExceptions;
+package task.MyExceptions;
 
 public class ModsException extends Exception {
     public ModsException(String message) { super(message); }

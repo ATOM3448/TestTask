@@ -1,4 +1,4 @@
-package MyExceptions;
+package task.MyExceptions;
 
 public class ArgumentsHandlerException extends Exception {
     public ArgumentsHandlerException(String message) { super(message); }
