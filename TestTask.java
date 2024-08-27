@@ -1,5 +1,11 @@
+// ПЕРЕВЕДИ В ООП ЧТЕНИЕ
+// ПЕРЕВЕДИ В ООП ПАРСИНГ АРГУМЕНТОВ
+// РЕАЛИЗУЙ ПЕРЕХВАТ ИСКЛЮЧЕНИЙ
+// СДЕЛАЙ КОПИЮ РЕШЕНИЯ БЕЗ ПОСТОЯННОГО ПЕРЕХВАТА ПОТОКА ЧТЕНИЯ
+
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 import java.math.*;
 
 class TestTask 
@@ -27,7 +33,7 @@ class TestTask
                     append = true;
                     break;
                 case "-o":
-                    outPath = args[++i];
+                    outPath = args[++i].replace('\\', '/');
                     break;
                 case "-p":
                     prefix = args[++i];
@@ -90,19 +96,19 @@ class TestTask
                     {
                         if (strBuf.matches("([-+]?\\d+)|(\\([-+]?\\d+\\))"))
                         {
-                            counterInt = counterInt.add(BigInteger.ONE);
-
-                            if (counterInt.equals(BigInteger.ONE))
+                            if (counterInt.equals(BigInteger.ZERO))
                                 integersOut = new BufferedWriter(new FileWriter(outPath + "integers.txt", append));
 
                             integersOut.write(strBuf);
                             integersOut.newLine();
 
+                            counterInt = counterInt.add(BigInteger.ONE);
+
                             if (!fullStat)
                                 continue;
 
                             BigInteger bufInt = new BigInteger(strBuf.replace("(", "")
-                                                                    .replace(")", ""));
+                                                                     .replace(")", ""));
 
                             if (counterInt.equals(BigInteger.ONE))
                             {
@@ -125,21 +131,21 @@ class TestTask
                         }
                         else if (strBuf.matches("[-+]?\\d+[.,]\\d+([EeЕе]\\^?(([-+]?\\d+)|(\\([-+]?\\d+\\))))?"))
                         {
-                            counterFloat = counterFloat.add(BigInteger.ONE);
-
-                            if (counterFloat.equals(BigInteger.ONE))
+                            if (counterFloat.equals(BigInteger.ZERO))
                                 floatsOut = new BufferedWriter(new FileWriter(outPath + "floats.txt", append));
 
                             floatsOut.write(strBuf);
                             floatsOut.newLine();
 
+                            counterFloat = counterFloat.add(BigInteger.ONE);
+
                             if (!fullStat)
                                 continue;
 
                             BigDecimal bufFloat = new BigDecimal(strBuf.replace("^", "")
-                                                                    .replace("(", "")
-                                                                    .replace(")", "")
-                                                                    .replace(",", "."));
+                                                                       .replace("(", "")
+                                                                       .replace(")", "")
+                                                                       .replace(",", "."));
 
                             if (counterFloat.equals(BigInteger.ONE))
                             {
@@ -162,12 +168,13 @@ class TestTask
                         }
                         else
                         {
-                            counterStr = counterStr.add(BigInteger.ONE);
-                            if (counterStr.equals(BigInteger.ONE))
+                            if (counterStr.equals(BigInteger.ZERO))
                                 stringsOut = new BufferedWriter(new FileWriter(outPath + "strings.txt", append));
 
                             stringsOut.write(strBuf);
                             stringsOut.newLine();
+
+                            counterStr = counterStr.add(BigInteger.ONE);
 
                             if (!fullStat)
                                 continue;
@@ -194,8 +201,11 @@ class TestTask
                 }
                 catch (IOException ex) 
                 {
+                    if (Pattern.compile(outPath+"(integers|floats|strings).txt").matcher(ex.getMessage()).find())
+                        throw ex;
+
                     System.out.printf("Ошибка работы с потоком чтения файла %s\n%s\nФайл игнорируется\n", source,
-                                                                                                                ex.getMessage());
+                                                                                                                 ex.getMessage());
                 }
             }
 
