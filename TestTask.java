@@ -118,6 +118,12 @@ class TestTask {
             System.err.println(ex.getMessage());
             return;
         }
+        catch (Exception ex) {
+            System.out.println("Неизвестная ошибка при обработке аргументов\n" +
+                               "Работа завершена во избежание нежелательного результата");
+            System.err.println(ex.getMessage());
+            return;
+        }
 
         // Объявляем необходимые обработчики
         ArrayList<TypeHandler> handlers = new ArrayList<TypeHandler>();
